@@ -3,7 +3,11 @@ package br.com.sispes.dao;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import br.com.sispes.conexaoJDBC.ConexaoJDBC;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import br.com.sispes.conexao.ConexaoJDBC;
+import br.com.sispes.conexao.FazerConexao;
 import br.com.sispes.model.Pessoa;
 
 import com.mysql.jdbc.Connection;
@@ -23,6 +27,23 @@ public class PessoaDAO {
 		comando.executeUpdate();
 		comando.close();
 		
+	}
+	
+	public void guardar(Pessoa pessoa){
+		Session sessao = FazerConexao.getSessionFactory().openSession();
+		Transaction transacao = null;
+		
+		try{
+		transacao = sessao.beginTransaction();
+		sessao.save(pessoa);
+		transacao.commit();
+		}catch(RuntimeException e){
+			if(transacao != null){
+				transacao.rollback();
+			}
+		}finally{
+			sessao.close();
+		}
 	}
 
 }
